@@ -2,8 +2,12 @@ name: Sync Upstream
 
 # 自动同步上游 jxxghp/MoviePilot-Plugins 的更新到本 fork。
 # 策略：fetch upstream -> 尝试 merge。
-#   - 干净 merge：自动 push 到 main；
-#   - 有冲突：开/刷新 sync-upstream PR，在 GitHub UI 手动解决冲突后合并。
+#   - 干净 merge：自动 push 到 main（用默认 GITHUB_TOKEN 即可）。
+#   - 有冲突：推送 sync-upstream 分支，并用 SYNC_TOKEN(PAT) 自动开 PR 供人工解决。
+#             若未配置 SYNC_TOKEN，则因 GITHUB_TOKEN 无法创建 PR，改为报错并给出手动开 PR 的链接。
+#
+# 启用冲突自动开 PR：在 仓库 Settings > Secrets and variables > Actions 添加
+#   SYNC_TOKEN = 一个 Personal Access Token（classic 需 repo 权限，或 fine-grained 授予本仓库 contents:write、pull-requests:write）。
 
 on:
   schedule:
@@ -46,10 +50,12 @@ jobs:
             echo "Upstream has new commits."
           fi
 
-      - name: Merge or open sync PR
+      - name: Sync (merge or open sync PR)
         if: steps.check.outputs.has_updates == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # 优先用 PAT；未配置 SYNC_TOKEN 时回退到 GITHUB_TOKEN（仅够 push，无法创建 PR）
+          GH_TOKEN: ${{ secrets.SYNC_TOKEN || secrets.GITHUB_TOKEN }}
+          HAS_PAT: ${{ secrets.SYNC_TOKEN != '' }}
         run: |
           set -uo pipefail
 
@@ -60,33 +66,37 @@ jobs:
             exit 0
           fi
 
-          echo "⚠️ Merge conflicts — opening a PR for manual resolution."
+          echo "⚠️ Merge conflicts — pushing sync-upstream branch for manual resolution."
           git merge --abort
 
           SYNC_BRANCH="sync-upstream"
-          # 让 PR 的 head 即为上游最新快照，base 为 main，由 GitHub 标注冲突
           git checkout -B "$SYNC_BRANCH" upstream/main
           git push --force origin "$SYNC_BRANCH"
 
-          existing_pr="$(gh pr list --base main --head "$SYNC_BRANCH" --state open --json number -q '.[0].number // empty' 2>/dev/null || true)"
+          if [ "$HAS_PAT" = "true" ]; then
+            printf '%s\n' \
+              '## ⬆️ 同步上游 jxxghp/MoviePilot-Plugins' \
+              '' \
+              '此 PR 由 `Sync Upstream` workflow 自动创建/刷新，用于把上游更新合入 `main`。' \
+              '' \
+              '- 含有**需要手动解决冲突**的文件（常见于 `package.v2.json`、`traktcleaner` 等双方都改过的地方）。' \
+              '- 请在 GitHub 的 *Resolve conflicts* 界面处理后再合并。' \
+              '- 合并后下一次定时检查将回到「干净自动同步」状态。' \
+              > /tmp/pr-body.md
 
-          printf '%s\n' \
-            '## ⬆️ 同步上游 jxxghp/MoviePilot-Plugins' \
-            '' \
-            '此 PR 由 `Sync Upstream` workflow 自动创建/刷新，用于把上游更新合入 `main`。' \
-            '' \
-            '- 含有**需要手动解决冲突**的文件（常见于 `package.v2.json`、`iyuuautoseed`、`traktcleaner` 等双方都改过的地方）。' \
-            '- 请在 GitHub 的 *Resolve conflicts* 界面处理后再合并。' \
-            '- 合并后下一次定时检查将回到「干净自动同步」状态。' \
-            > /tmp/pr-body.md
+            existing_pr="$(gh pr list --base main --head "$SYNC_BRANCH" --state open --json number -q '.[0].number // empty' 2>/dev/null || true)"
 
-          if [ -n "$existing_pr" ]; then
-            gh pr edit "$existing_pr" --body-file /tmp/pr-body.md
-            gh pr comment "$existing_pr" --body "🔄 上游有新更新，冲突已刷新，请重新解决后合并。"
-            echo "::notice::Refreshed existing sync PR #$existing_pr."
+            if [ -n "$existing_pr" ]; then
+              gh pr edit "$existing_pr" --body-file /tmp/pr-body.md
+              gh pr comment "$existing_pr" --body "🔄 上游有新更新，冲突已刷新，请重新解决后合并。"
+              echo "::notice::Refreshed existing sync PR #$existing_pr."
+            else
+              gh pr create --base main --head "$SYNC_BRANCH" \
+                --title "⬆️ 同步上游 jxxghp/MoviePilot-Plugins" \
+                --body-file /tmp/pr-body.md
+              echo "::notice::Created new sync PR for conflict resolution."
+            fi
           else
-            gh pr create --base main --head "$SYNC_BRANCH" \
-              --title "⬆️ 同步上游 jxxghp/MoviePilot-Plugins" \
-              --body-file /tmp/pr-body.md
-            echo "::notice::Created new sync PR for conflict resolution."
+            echo "::error::检测到冲突并已推送 sync-upstream 分支，但默认 GITHUB_TOKEN 无法创建 PR。请任选其一：(1) 在仓库 Settings > Secrets > Actions 添加 SYNC_TOKEN(PAT) 后重跑以自动开 PR；(2) 手动打开 https://github.com/${GITHUB_REPOSITORY}/compare/main...sync-upstream 新建 PR 并解决冲突。"
+            exit 1
           fi
