@@ -412,6 +412,18 @@
       "v0.1": "视频多级分类插件, 目前仅支持电影按评分，年代，系列分类。"
     }
   },
+  "NotifyImage": {
+    "name": "通知高清图片",
+    "description": "发送通知前将 TMDB 图片地址从 w500 升级为 w1280 高清尺寸，提升飞书等推送渠道的图片清晰度。",
+    "labels": "消息通知",
+    "version": "1.0",
+    "icon": "notifyimage.png",
+    "author": "zf",
+    "level": 1,
+    "history": {
+      "v1.0": "通知图片升级为 w1280 高清"
+    }
+  },
   "MoviePilotUpdateNotify": {
     "name": "MoviePilot更新推送",
     "description": "MoviePilot推送release更新通知、自动重启。",
@@ -506,12 +518,13 @@
     "name": "IMDb源",
     "description": "让探索，推荐和媒体识别支持IMDb数据源。",
     "labels": "探索",
-    "version": "1.6.10",
+    "version": "1.6.11",
     "icon": "IMDb_IOS-OSX_App.png",
     "author": "wumode",
     "level": 1,
     "system_version": ">2.12.4",
     "history": {
+      "v1.6.11": "修复 IMDb API 请求 403 问题",
       "v1.6.10": "更新 IMDb API 域名与超时设置",
       "v1.6.9": "简繁转换依赖改用 zhconv-rs，需要 MoviePilot >2.12.4",
       "v1.6.8": "兼容 MoviePilot v2.11.0 识别链新增 share_meta 参数，修复辅助识别模式下刮削报错",
@@ -1000,18 +1013,54 @@
     "name": "全屏海报墙",
     "description": "这是一个全屏海报墙插件，让所有终端可以播放精美的电影海报。抓取 MoviePilot 推荐媒体（流行趋势/TMDB热门电影/TMDB热门电视剧）的海报图片，以照片/拼贴/纵深穿梭/滑动面板/浮动/怀旧冲印/光舞等多种动效全屏展示，支持局域网海报墙页面。",
     "labels": "媒体展示",
-    "version": "1.14.2",
-    "icon": "fullscreenposterwall.png",
+    "version": "1.14.5",
+    "icon": "https://raw.githubusercontent.com/ltdstudio/posterwall/main/icons/fullscreenposterwall.png",
     "author": "ltdstudio",
     "level": 1,
     "system_version": ">=2.12.0",
     "history": {
+      "v1.14.5": "修复主页仪表板格子塌缩（只见标题、内容不占位）",
+      "v1.14.4": "插件图标改为完整 URL 地址，修复图标不显示",
+      "v1.14.3": "修复 Logo 丢失：logo 模式下原生带字图加载失败回退到普通图时，按实际加载结果恢复 Logo 叠层；更换插件图标",
       "v1.14.2": "新增海报数量设置（30/60/120/180/240，按源自动分页拉取）；图片预加载失败时在同条目内按候选链回退（Fanart CDN 不可达自动降级 TMDB），死主机记忆避免重复白等超时；纵深穿梭/流动拼贴/局域网海报墙同步优化",
       "v1.13.1": "修复审查问题：Logo 补抓每缓存周期仅一次（防穿透限流）、浮动动效素材循环复用且预览不再空转、环形画廊按真实间隔配置轮换、纵深穿梭缺图时进入空态不再卡死",
       "v1.13.0": "新增 3D 环形画廊动效（极光光斑/微尘光点氛围背景、螺旋飞出切换），拼贴动效更名「流动拼贴」，纵深穿梭动效优化，局域网海报墙页面同步升级",
       "v1.11.0": "新增不断变化的拼贴/纵深穿梭/滑动面板等动效，海报图支持 Fanart 原生带片名横图与官方 Logo 叠加，新增局域网海报墙页面",
       "v1.0.2": "修复 dashboard 格式/API 解包/timer 响应，新增 lan-wall 与 public-data 无认证接口",
       "v1.0.0": "初始版本，支持照片/浮动/怀旧冲印/光舞等屏幕保护动效"
+    }
+  },
+  "BangumiProxy": {
+    "name": "Bangumi代理",
+    "description": "为 MoviePilot 内置 Bangumi 动漫数据与图片请求配置自定义代理 Base URL。",
+    "labels": "Bangumi,动漫,网络",
+    "version": "1.0.0",
+    "icon": "Bangumi_A.png",
+    "author": "kiritoxjf",
+    "level": 1,
+    "history": {
+      "v1.0.0": "新增 Bangumi 数据与图片代理 Base URL 配置，兼容 MoonPlus 代理拼接规则。"
+    }
+  },
+  "StorageCleanup": {
+    "name": "存储清理",
+    "description": "按电影或整部剧聚合展示媒体、做种与保护关系，并提供三档安全清理。",
+    "labels": "存储,媒体库,下载管理",
+    "version": "1.0.7",
+    "icon": "https://raw.githubusercontent.com/Hommchen/nas-storage-cleanup-ui-public/main/public/storagecleanup.svg",
+    "author": "Hommchen",
+    "level": 1,
+    "release": true,
+    "system_version": ">=2.14.6",
+    "history": {
+      "v1.0.6": "刷新资源清单时显示阶段与耗时，明确长时间 H&R 只读探测仍在进行",
+      "v1.0.7": "移除 MoviePilot 内部标识，改用面向用户的安全清理台标题",
+      "v1.0.5": "新增 NAS 拓扑设置、路径只读探测与配置变更后的安全锁定",
+      "v1.0.4": "丢弃过期清理计划响应，并修复执行前计划重建异常",
+      "v1.0.3": "新增手机卡片布局、横向筛选、双行操作面板及安全区弹窗适配",
+      "v1.0.2": "全部操作栏和弹窗统一挂到浏览器根节点，始终相对当前视口定位",
+      "v1.0.1": "操作栏固定到浏览器视口，并使用版本化联邦入口避免旧前端缓存",
+      "v1.0.0": "接入 PiNAS 清理台原生 Vue 页面、侧栏入口与三档真实执行链路"
     }
   }
 }

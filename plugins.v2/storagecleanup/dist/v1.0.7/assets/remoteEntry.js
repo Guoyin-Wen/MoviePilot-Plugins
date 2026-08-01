@@ -1,15 +1,15 @@
 const currentImports = {};
       const exportSet = new Set(['Module', '__esModule', 'default', '_export_sfc']);
       let moduleMap = {
+"./AppPage":()=>{
+      dynamicLoadingCss(["__federation_expose_AppPage-7DnY9Ffm.css"], false, './AppPage');
+      return __federation_import('./__federation_expose_AppPage-WrNLRDkU.js').then(module =>Object.keys(module).every(item => exportSet.has(item)) ? () => module.default : () => module)},
 "./Page":()=>{
-      dynamicLoadingCss(["__federation_expose_Page-Cg-zWlge.css","DepthTunnel-Z5fWXU5w.css"], false, './Page');
-      return __federation_import('./__federation_expose_Page-DyhZBdVn.js').then(module =>Object.keys(module).every(item => exportSet.has(item)) ? () => module.default : () => module)},
+      dynamicLoadingCss(["__federation_expose_AppPage-7DnY9Ffm.css"], false, './Page');
+      return __federation_import('./__federation_expose_Page-DAUTopwb.js').then(module =>Object.keys(module).every(item => exportSet.has(item)) ? () => module.default : () => module)},
 "./Config":()=>{
-      dynamicLoadingCss(["__federation_expose_Config-CzrE8sLN.css"], false, './Config');
-      return __federation_import('./__federation_expose_Config-DwLNSYr8.js').then(module =>Object.keys(module).every(item => exportSet.has(item)) ? () => module.default : () => module)},
-"./Dashboard":()=>{
-      dynamicLoadingCss(["__federation_expose_Dashboard-CXWTKYsH.css","DepthTunnel-Z5fWXU5w.css"], false, './Dashboard');
-      return __federation_import('./__federation_expose_Dashboard-Doh6gfFP.js').then(module =>Object.keys(module).every(item => exportSet.has(item)) ? () => module.default : () => module)},};
+      dynamicLoadingCss(["__federation_expose_Config-BHIxEI63.css"], false, './Config');
+      return __federation_import('./__federation_expose_Config-BlunJQWM.js').then(module =>Object.keys(module).every(item => exportSet.has(item)) ? () => module.default : () => module)},};
       const seen = {};
       const dynamicLoadingCss = (cssFilePaths, dontAppendStylesToHead, exposeItemName) => {
         const metaUrl = import.meta.url;
@@ -48,9 +48,9 @@ const currentImports = {};
          } else {
            href = cssPath;
          }
-         
+
           if (dontAppendStylesToHead) {
-            const key = 'css__FullScreenPosterWall__' + exposeItemName;
+            const key = 'css__StorageCleanup__' + exposeItemName;
             window[key] = window[key] || [];
             window[key].push(href);
             return;
