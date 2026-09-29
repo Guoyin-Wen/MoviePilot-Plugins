@@ -479,7 +479,7 @@
   "MaoyanRank": {
     "name": "猫眼榜单订阅",
     "description": "监控猫眼数据，自动添加订阅。",
-    "version": "4.1.0",
+    "version": "4.1.2",
     "icon": "https://raw.githubusercontent.com/baozaodetudou/MoviePilot-Plugins/main/icons/maoyan.jpg",
     "color": "#fefefe",
     "author": "逗猫",
@@ -487,6 +487,8 @@
     "release": true,
     "system_version": ">=3.0.0",
     "history": {
+      "v4.1.2": "修复猫眼热度榜旧接口 403，使用官网当前接口及浏览器会话请求，按北京时间传递榜单日期并保留平台筛选与异常隔离",
+      "v4.1.1": "修复上映信息为空时的年份解析警告，隔离 Cookie 获取、单源请求和榜单坏条目异常，避免影响后续榜单与订阅",
       "v4.1.0": "适配 V3 SDK 导入规范：插件内部导入全面迁移至 app.sdk 体系，去除对旧版兼容层的依赖。",
       "v4.0.0": "V3 独立大版本：统一媒体身份，拒绝零值或未知来源，并在合法回填后迁移插件历史中的旧媒体 ID 字段。",
       "v3.2": "修复剧集订阅季号识别，标题含季号时优先使用标题季号，否则按TMDB最新季订阅",
@@ -870,6 +872,32 @@
       "v1.11.0": "新增不断变化的拼贴/纵深穿梭/滑动面板等动效，海报图支持 Fanart 原生带片名横图与官方 Logo 叠加，新增局域网海报墙页面",
       "v1.0.2": "修复 dashboard 格式/API 解包/timer 响应，新增 lan-wall 与 public-data 无认证接口",
       "v1.0.0": "初始版本，支持照片/浮动/怀旧冲印/光舞等屏幕保护动效"
+    }
+  },
+  "AutoSubtitle": {
+    "name": "自动字幕下载",
+    "description": "文件整理完成后自动搜索并下载缺失的字幕",
+    "labels": "字幕",
+    "version": "2.0.0",
+    "icon": "subtitle.png",
+    "author": "yubanmeiqin9048",
+    "level": 2,
+    "system_version": ">=3.0.0",
+    "history": {
+      "v2.0.0": "适配 MoviePilot V3，安装时不再强制构建可选调轴依赖"
+    }
+  },
+  "SubtitleAssistant": {
+    "name": "字幕助手",
+    "description": "覆盖搜索、匹配、下载、归属、落盘、维护与审计的字幕全生命周期管理。",
+    "labels": "字幕",
+    "version": "2.0.0",
+    "icon": "https://raw.githubusercontent.com/yubanmeiqin9048/MoviePilot-Plugins/main/icons/SubtitleAssistant.png",
+    "author": "yubanmeiqin9048",
+    "level": 1,
+    "system_version": ">=3.0.0",
+    "history": {
+      "v2.0.0": "适配 MoviePilot V3 插件依赖清单与运行合同"
     }
   }
 }
