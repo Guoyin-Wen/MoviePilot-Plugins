@@ -2,12 +2,15 @@ name: Sync Upstream
 
 # 自动同步上游 jxxghp/MoviePilot-Plugins 的更新到本 fork。
 # 策略：fetch upstream -> 尝试 merge。
-#   - 干净 merge：自动 push 到 main（用默认 GITHUB_TOKEN 即可）。
-#   - 有冲突：推送 sync-upstream 分支，并用 SYNC_TOKEN(PAT) 自动开 PR 供人工解决。
-#             若未配置 SYNC_TOKEN，则因 GITHUB_TOKEN 无法创建 PR，改为报错并给出手动开 PR 的链接。
+#   - 干净 merge：自动 push 到 main。
+#   - 有冲突：推送 sync-upstream 分支，并自动开 PR 供人工解决。
 #
-# 启用冲突自动开 PR：在 仓库 Settings > Secrets and variables > Actions 添加
-#   SYNC_TOKEN = 一个 Personal Access Token（classic 需 repo 权限，或 fine-grained 授予本仓库 contents:write、pull-requests:write）。
+# 注意：GITHUB_TOKEN 无 workflows 权限，若同步内容包含 .github/workflows/ 变更，
+# 用它 push 会被拒（干净 merge 也不例外）。推荐配置 SYNC_TOKEN 一劳永逸：
+#   仓库 Settings > Secrets and variables > Actions > Secrets 添加
+#   SYNC_TOKEN = Personal Access Token：
+#     - classic：repo + workflow 权限
+#     - fine-grained：本仓库 Contents: Read and write + Pull requests: Read and write
 
 on:
   schedule:
@@ -28,6 +31,8 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
+          # 优先 PAT：使后续 push / 开 PR 均以 PAT 身份进行（可推送 workflow 文件变更）
+          token: ${{ secrets.SYNC_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Configure git
         run: |
@@ -61,7 +66,10 @@ jobs:
 
           if git merge upstream/main --no-edit; then
             echo "✅ Clean merge — pushing to main."
-            git push origin main
+            if ! git push origin main; then
+              echo "::error::干净 merge 完成但 push 失败。常见原因：本次同步包含 .github/workflows/ 文件变更，而 GITHUB_TOKEN 无 workflows 权限。请在仓库 Secrets 配置 SYNC_TOKEN（classic 需 repo+workflow；fine-grained 需 Contents RW + Pull requests RW）后重跑。"
+              exit 1
+            fi
             echo "::notice::Synced upstream to main successfully."
             exit 0
           fi
@@ -71,7 +79,10 @@ jobs:
 
           SYNC_BRANCH="sync-upstream"
           git checkout -B "$SYNC_BRANCH" upstream/main
-          git push --force origin "$SYNC_BRANCH"
+          if ! git push --force origin "$SYNC_BRANCH"; then
+            echo "::error::冲突分支 push 失败（常见原因：包含 workflow 文件变更而 GITHUB_TOKEN 无 workflows 权限）。请配置 SYNC_TOKEN(PAT) 后重跑，或在本地 merge upstream/main 解决冲突后直接 push main。"
+            exit 1
+          fi
 
           if [ "$HAS_PAT" = "true" ]; then
             printf '%s\n' \
